@@ -44,6 +44,7 @@ pm.execute_notebook(
     parameters=dict(
         BASKET_BOOL_PATH="data/processed/basket_bool.parquet",
         RULES_OUTPUT_PATH="data/processed/rules_apriori_filtered.csv",
+        EXEC_TIME_APRIORI_PATH="data/processed/apriori_time.txt",
 
         # Tham số Apriori
         MIN_SUPPORT=0.01,
@@ -79,6 +80,7 @@ pm.execute_notebook(
     parameters=dict(
         BASKET_BOOL_PATH="data/processed/basket_bool.parquet",
         RULES_FPG_OUTPUT_PATH="data/processed/rules_fpgrowth_filtered.csv",
+        EXEC_TIME_FPG_PATH="data/processed/fpgrowth_time.txt",
 
         MIN_SUPPORT=0.01,
         MAX_LEN=3,
@@ -102,5 +104,21 @@ pm.execute_notebook(
     ),
     kernel_name="python3",   
 )
+
+# 5. Apriori vs FP‐Growth Comparison
+
+pm.execute_notebook(
+    "notebooks/compare_algorithms.ipynb",
+    "notebooks/runs/05_compare_algorithms_run.ipynb",
+    parameters=dict(
+        AR_RULES_PATH="data/processed/rules_apriori_filtered.csv",
+        FPG_RULES_PATH="data/processed/rules_fpgrowth_filtered.csv",
+        EXEC_TIME_APRIORI_PATH="data/processed/apriori_time.txt",
+        EXEC_TIME_FPG_PATH="data/processed/fpgrowth_time.txt",
+        OUTPUT_COMPARE_TABLE="data/processed/comparison_apriori_vs_fpg.csv",
+    ),
+    kernel_name="python3",  
+)
+
 
 print("Đã chạy xong pipeline")
