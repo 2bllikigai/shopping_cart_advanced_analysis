@@ -28,7 +28,7 @@ Tuy nhiên, dưới sự dẫn dắt kỹ thuật của **Leader Kiều Quang Tr
 
 Sau khi thuật toán chạy xong, điều thú vị nhất đã hiện ra. Thay vì những con số khô khan, chúng tôi đã mô hình hóa các luật kết hợp thành một **Mạng lưới (Network Graph)**.
 
-![Network Graph](/images/sup_03_network.png)
+![Network Graph](/images/lab1/sup_03_network.png)
 *(Hình 1: Mạng lưới liên kết giữa các sản phẩm tại mức Support 0.03)*
 
 Nhìn vào biểu đồ trên, bạn có thể thấy rõ các **"Cụm sản phẩm" (Product Clusters)** tách biệt nhau:
@@ -41,7 +41,7 @@ Dựa vào số liệu, bạn **Võ Minh Quân (Analyst)** đã tìm ra 2 loại
 
 #### a. Hiệu ứng "Bộ sưu tập" (Dựa trên chỉ số Lift cao kỷ lục)
 
-![Top Lift Rules](/images/top_5_lifts_rules.png)
+![Top Lift Rules](/images/lab1/top_5_lifts_rules.png)
 *(Hình 2: Các luật có chỉ số Lift cao nhất)*
 
 Chúng tôi phát hiện ra cặp sản phẩm: **Pink Regency Teacup** (Tách hồng) và **Green Regency Teacup** (Tách xanh).
@@ -50,7 +50,7 @@ Chúng tôi phát hiện ra cặp sản phẩm: **Pink Regency Teacup** (Tách h
 
 #### b. Hiệu ứng "Dự báo chắc chắn" (Dựa trên Confidence > 80%)
 
-![Top Confidence Rules](/images/top_5_confidence_rules.png)
+![Top Confidence Rules](/images/lab1/top_5_confidence_rules.png)
 *(Hình 3: Các luật có độ tin cậy cao nhất)*
 
 Dữ liệu chỉ ra rằng: Nếu khách đã bỏ *Pink Teacup* vào giỏ, thì **82%** chắc chắn họ sẽ tìm mua *Green Teacup*. Đây là một con số biết nói để bộ phận kho vận chuẩn bị hàng hóa, tránh tình trạng "lệch pha" (thừa màu này thiếu màu kia).
