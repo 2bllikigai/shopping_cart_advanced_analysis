@@ -1,4 +1,4 @@
-numpy>=1.26.0
+numpy
 pandas>=2.1.0
 matplotlib>=3.8.0
 seaborn>=0.13.0
@@ -9,4 +9,4 @@ ipykernel
 jupyter
 notebook
 openpyxl
-pyarrow
+pyarrow==14.0.1
