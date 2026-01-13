@@ -26,16 +26,15 @@ with st.sidebar:
 
 ## 2. HÀM XỬ LÝ DỮ LIỆU
 # Hàm làm sạch chuỗi luật (Biến "frozenset({'Item A'})" thành "Item A")
-def clean_rule_text(rule_str):
-    try:
-        if isinstance(rule_str, str):
-            # Dùng literal_eval để biến chuỗi thành set thật
-            rule_set = literal_eval(rule_str)
-            # Chuyển thành chuỗi ngăn cách bởi dấu phẩy
-            return ", ".join(list(rule_set))
-        return str(rule_str)
-    except:
-        return str(rule_str)
+def clean_rule_text(raw_text):
+    text = str(raw_text)
+    # Danh sách các ký tự rác cần xóa bỏ khỏi chuỗi
+    garbage_list = ["frozenset({", "})", "frozenset", "{", "}", "'", '"']
+    
+    for garbage in garbage_list:
+        text = text.replace(garbage, "")
+    
+    return text.strip()
 
 @st.cache_data
 def load_data():
@@ -117,27 +116,42 @@ try:
 
         # Định nghĩa chiến lược (Bạn có thể sửa text ở đây cho phù hợp với biểu đồ RFM thực tế)
         cluster_strategies = {
-            0: {
-                "name": "Nhóm Vàng (Loyal)",
-                "desc": "Khách mua thường xuyên và chi tiêu cao.",
-                "action": "Chăm sóc đặc biệt, upsell sản phẩm cao cấp."
-            },
-            1: {
-                "name": "Nhóm Rời bỏ (Churn)",
-                "desc": "Mua nhiều trong quá khứ nhưng lâu không quay lại.",
-                "action": "Gửi email 'We miss you' kèm mã giảm giá."
-            },
-            2: {
-                "name": "Nhóm Tiết kiệm (Low Value)",
-                "desc": "Mua ít và giá trị đơn hàng thấp.",
-                "action": "Gợi ý combo giá rẻ để tăng giá trị giỏ hàng."
-            },
-            3: {
-                "name": "Nhóm Mới/Tiềm năng",
-                "desc": "Mới mua gần đây, tần suất trung bình.",
-                "action": "Cross-sell sản phẩm liên quan để giữ chân."
-            }
+        0: {
+            "name": "Nhóm Vàng (Champions)",
+            "desc": "Chi tiêu mạnh tay (M cao), mua thường xuyên (F cao) và mới mua gần đây (R thấp).",
+            "action": "Ưu tiên số 1: Giới thiệu sản phẩm mới nhất, đắt nhất."
+        },
+        1: {
+            "name": "Nhóm Trung Thành (Loyal)",
+            "desc": "Mua hàng đều đặn (F cao), là nguồn thu ổn định.",
+            "action": "Tặng điểm thưởng, gợi ý sản phẩm mua kèm (Cross-sell)."
+        },
+        2: {
+            "name": "Nhóm Tiềm Năng (Promising)",
+            "desc": "Mới mua gần đây, giá trị đơn hàng trung bình.",
+            "action": "Gửi voucher giảm giá để kích thích mua đơn tiếp theo."
+        },
+        3: {
+            "name": "Khách Mới (New Customers)",
+            "desc": "Vừa thực hiện giao dịch đầu tiên (R rất thấp, F thấp).",
+            "action": "Gửi email cảm ơn, hướng dẫn sử dụng, xây dựng mối quan hệ."
+        },
+        4: {
+            "name": "Cần Chăm Sóc (Need Attention)",
+            "desc": "Có sức mua khá nhưng tần suất đang giảm dần.",
+            "action": "Gợi ý các combo (Bundle) giá tốt để kéo họ quay lại."
+        },
+        5: {
+            "name": "Nguy Cơ Rời Bỏ (At Risk)",
+            "desc": "Đã từng mua nhiều nhưng rất lâu không quay lại (R cao).",
+            "action": "CHIẾN DỊCH KHẨN CẤP: Giảm giá sâu, quà tặng miễn phí để kéo lại."
+        },
+        6: {
+            "name": "Ngủ Đông (Lost/Hibernating)",
+            "desc": "Lâu không mua, giá trị thấp, ít tương tác.",
+            "action": "Giảm thiểu chi phí marketing, chỉ gửi tin tin khuyến mãi lớn dịp lễ."
         }
+    }
         default_strategy = {"name": "Nhóm Khách hàng", "desc": "Đang phân tích...", "action": "Tiếp tục theo dõi."}
 
         tabs = st.tabs([f"Cụm {i}" for i in range(k_clusters)])
@@ -151,7 +165,7 @@ try:
                 
                 st.divider()
                 
-                # 5.2 HIỂN THỊ LUẬT KẾT HỢP (Đã nâng cấp hiển thị)
+                # 5.2 HIỂN THỊ LUẬT KẾT HỢP
                 st.subheader(f"Top {top_n_rules} Quy luật nổi bật của Cụm {i}")
                 
                 if i in df_summary.index:
@@ -163,26 +177,58 @@ try:
                         
                         has_rule = False
                         for r_col, score in top_rules_idx.items():
-                            if score > 0.0: # Chỉ hiện luật có xuất hiện trong cụm
+                            if score > 0.0:
                                 has_rule = True
                                 idx = int(r_col.split('_')[1])
                                 
                                 if idx < len(df_rules):
                                     rule_info = df_rules.iloc[idx]
                                     
-                                    # --- SỬA Ở ĐÂY: Dùng hàm clean_rule_text ---
+                                    # 1. Làm sạch tên sản phẩm
                                     ant = clean_rule_text(rule_info['antecedents'])
                                     con = clean_rule_text(rule_info['consequents'])
                                     
-                                    with st.expander(f"Quy luật {idx} - Độ phổ biến: {score*100:.1f}%"):
-                                        st.markdown(f"🛒 **Khách mua:** `{ant}`")
-                                        st.markdown(f"🎁 **Thường mua thêm:** `{con}`")
-                                        col_a, col_b = st.columns(2)
-                                        col_a.caption(f"Lift: {rule_info['lift']:.2f}")
-                                        col_b.caption(f"Confidence: {rule_info.get('confidence', 0):.2f}")
+                                    # 2. Tính toán chỉ số để diễn giải
+                                    conf_percent = rule_info.get('confidence', 0) * 100
+                                    lift_val = rule_info['lift']
+                                    
+                                    # 3. Tạo câu "Thần chú Marketing" dựa trên số liệu
+                                    marketing_text = ""
+                                    if lift_val >= 3:
+                                        marketing_text = "🔥 **Combo Siêu Kết Dính:** Hai món này gần như luôn được mua cùng nhau. Hãy đóng gói chung (Bundle) để bán ngay!"
+                                    elif lift_val >= 1.5:
+                                        marketing_text = "✅ **Cơ hội Cross-sell:** Khách mua món trước rất dễ bị thuyết phục mua món sau. Hãy gợi ý ngay tại quầy thu ngân."
+                                    else:
+                                        marketing_text = "💡 **Gợi ý phổ biến:** Đây là thói quen mua sắm thường thấy."
+
+                                    # 4. HIỂN THỊ GIAO DIỆN (Đã cải tiến cho người dùng dễ hiểu)
+                                    with st.expander(f"📌 Gợi ý #{idx} (Độ phổ biến: {score*100:.1f}%)"):
+                                        
+                                        # Hiện câu thần chú marketing
+                                        st.info(marketing_text)
+                                        
+                                        # Hiện luồng hành vi dạng mũi tên trực quan
+                                        c1, c2, c3 = st.columns([4, 1, 4])
+                                        with c1:
+                                            st.markdown("**Khi khách chọn mua:**")
+                                            st.markdown(f"<div style='background-color:#e8f5e9; padding:10px; border-radius:5px; color:#1b5e20'>🛒 {ant}</div>", unsafe_allow_html=True)
+                                        with c2:
+                                            st.markdown("<h2 style='text-align:center; color:#999'>➡</h2>", unsafe_allow_html=True)
+                                        with c3:
+                                            st.markdown("**Hãy mời chào họ thêm:**")
+                                            st.markdown(f"<div style='background-color:#ffebee; padding:10px; border-radius:5px; color:#b71c1c'>🎁 {con}</div>", unsafe_allow_html=True)
+                                        
+                                        st.divider()
+                                        
+                                        # Giải thích các con số kỹ thuật bằng ngôn ngữ người thường
+                                        st.markdown(f"""
+                                        **Tại sao nên tin luật này?**
+                                        - 🎯 **Khả năng thành công ({conf_percent:.1f}%):** Cứ 100 người mua món đầu tiên, thì có khoảng **{int(conf_percent)} người** sẽ đồng ý mua món thứ hai.
+                                        - 🔗 **Sức mạnh liên kết (Lift {lift_val:.2f}):** Việc mua kèm này mạnh gấp **{lift_val:.1f} lần** so với mua ngẫu nhiên.
+                                        """)
                         
                         if not has_rule:
-                                st.warning("Các luật trong cụm này có tần suất xuất hiện rất thấp.")
+                                st.warning("Các luật trong cụm này có tần suất xuất hiện rất thấp.")    
                     else:
                         st.warning("Không tìm thấy dữ liệu luật trong bảng tổng hợp.")
                 else:
