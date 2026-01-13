@@ -10,3 +10,4 @@ jupyter
 notebook
 openpyxl
 pyarrow==14.0.1
+scikit-learn
