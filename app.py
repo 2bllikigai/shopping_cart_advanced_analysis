@@ -9,12 +9,12 @@ from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 
 # Cấu hình trang
-st.set_page_config(page_title="Customer Segmentation Dashboard", layout="wide")
+st.set_page_config(page_title="Demo Mini Project", layout="wide")
 
 ## 1. TIÊU ĐỀ VÀ SIDEBAR
 st.title("📊 Hệ Thống Phân Khúc Khách Hàng Chuyên Sâu")
 st.markdown(
-    "Dashboard kết hợp phân tích **RFM** và **Luật kết hợp (Association Rules)** để thấu hiểu hành vi khách hàng."
+    "Dashboard kết hợp phân tích **RFM** và **Luật kết hợp** để thấu hiểu hành vi khách hàng."
 )
 
 with st.sidebar:
@@ -195,7 +195,7 @@ try:
                                     # 3. Tạo câu "Thần chú Marketing" dựa trên số liệu
                                     marketing_text = ""
                                     if lift_val >= 3:
-                                        marketing_text = "🔥 **Combo Siêu Kết Dính:** Hai món này gần như luôn được mua cùng nhau. Hãy đóng gói chung (Bundle) để bán ngay!"
+                                        marketing_text = "🔥 **Combo Siêu Kết Dính:** Hai món này gần như luôn được mua cùng nhau. Hãy đóng gói chung để bán ngay!"
                                     elif lift_val >= 1.5:
                                         marketing_text = "✅ **Cơ hội Cross-sell:** Khách mua món trước rất dễ bị thuyết phục mua món sau. Hãy gợi ý ngay tại quầy thu ngân."
                                     else:
